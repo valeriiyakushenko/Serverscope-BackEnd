@@ -102,3 +102,17 @@ export class ServerChartQueryDto {
   @IsIn(['24h', '3d', '7d', '30d'])
   period: '24h' | '3d' | '7d' | '30d';
 }
+
+export class ServerHistoryQueryDto {
+  @ApiProperty({ enum: ['24h', '3d', '7d', '30d'], description: 'History period' })
+  @IsNotEmpty()
+  @IsIn(['24h', '3d', '7d', '30d'])
+  period: '24h' | '3d' | '7d' | '30d';
+}
+
+export class ServerRankHistoryQueryDto {
+  @ApiProperty({ enum: ['3d', '7d', '30d'], description: 'Rank chart period' })
+  @IsNotEmpty()
+  @IsIn(['3d', '7d', '30d'])
+  period!: '3d' | '7d' | '30d';
+}

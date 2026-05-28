@@ -16,7 +16,7 @@ import { GamesService } from './games.service';
 import { QueryGamesDto } from './dto/query-games.dto';
 import { GameDto, GamesListResponseDto } from './dto/game-response.dto';
 
-@ApiTags('games')
+@ApiTags('Games')
 @Controller('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}

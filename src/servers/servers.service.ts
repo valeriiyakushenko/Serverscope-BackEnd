@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Server } from './servers.entity';
-import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto } from './dto/query-servers.dto';
-import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto } from './dto/server-response.dto';
+import { ServerRanking } from './server-ranking.entity';
+import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
+import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto, ServerRankChartResponseDto, ServerUptimeChartResponseDto } from './dto/server-response.dto';
 
 const SERVER_SELECT_FIELDS = [
   'server.id',
@@ -32,6 +33,8 @@ export class ServersService {
   constructor(
     @InjectRepository(Server)
     private readonly serverRepository: Repository<Server>,
+    @InjectRepository(ServerRanking)
+    private readonly rankingRepository: Repository<ServerRanking>,
   ) {}
 
   async findAll(query: QueryServersDto): Promise<ServersListResponseDto> {
@@ -84,8 +87,17 @@ export class ServersService {
 
     const [data, total] = await qb.getManyAndCount();
 
+    const serverIds = data.map((s) => s.id);
+    const rankingStats = await this.getLatestRankingStats(serverIds);
+
+    const enriched = data.map((s) => ({
+      ...s,
+      popularity: rankingStats.get(s.id)?.popularity ?? 0,
+      stability: rankingStats.get(s.id)?.stability ?? 0,
+    }));
+
     return {
-      data,
+      data: enriched,
       total,
       page,
       limit,
@@ -93,8 +105,28 @@ export class ServersService {
     };
   }
 
-  async findMaps(query: QueryServersMapsDto): Promise<ServerMapDto[]> {
-    const { appid, minServers = 100 } = query;
+  private async getLatestRankingStats(
+    serverIds: number[],
+  ): Promise<Map<number, { popularity: number; stability: number }>> {
+    if (!serverIds.length) return new Map();
+
+    const rows = await this.rankingRepository.query<
+      { server_id: number; popularity: number; stability: number }[]
+    >(
+      `SELECT DISTINCT ON (server_id)
+         server_id,
+         popularity::float AS popularity,
+         stability::float  AS stability
+       FROM server_rankings
+       WHERE server_id = ANY($1)
+       ORDER BY server_id, calculated_at DESC`,
+      [serverIds],
+    );
+
+    return new Map(rows.map((r) => [r.server_id, { popularity: r.popularity, stability: r.stability }]));
+  }
+
+  async findMaps(query: QueryServersMapsDto): Promise<ServerMapDto[]> {    const { appid, minServers = 100 } = query;
 
     return this.serverRepository.query<ServerMapDto[]>(
       `SELECT map, COUNT(*)::int AS "serverCount"
@@ -139,7 +171,14 @@ export class ServersService {
       throw new NotFoundException(`Server with id ${id} not found`);
     }
 
-    return server as ServerDetailDto;
+    const rankingStats = await this.getLatestRankingStats([id]);
+    const stats = rankingStats.get(id);
+
+    return {
+      ...(server as unknown as ServerDetailDto),
+      popularity: stats?.popularity ?? 0,
+      stability: stats?.stability ?? 0,
+    };
   }
 
   async findChart(id: number, query: ServerChartQueryDto): Promise<ServerChartResponseDto> {
@@ -201,5 +240,148 @@ export class ServersService {
     const rows = await this.serverRepository.query<{ time: string; players: number }[]>(sql, [id]);
 
     return { points: rows };
+  }
+
+  async findRankChart(id: number, query: ServerRankHistoryQueryDto): Promise<ServerRankChartResponseDto> {
+    const exists = await this.serverRepository.existsBy({ id });
+    if (!exists) {
+      throw new NotFoundException(`Server with id ${id} not found`);
+    }
+
+    const days = parseInt(query.period);
+    const sql = `
+      WITH period AS (
+        SELECT NOW() - INTERVAL '${days} days' AS date_from
+      ),
+      daily AS (
+        SELECT DISTINCT ON (DATE_TRUNC('day', calculated_at))
+          DATE_TRUNC('day', calculated_at) AS day,
+          rank,
+          score,
+          uptime_ratio
+        FROM server_rankings
+        WHERE server_id = $1
+          AND calculated_at >= (SELECT date_from FROM period)
+        ORDER BY DATE_TRUNC('day', calculated_at), calculated_at DESC
+      ),
+      slots AS (
+        SELECT generate_series(
+          DATE_TRUNC('day', (SELECT date_from FROM period)),
+          DATE_TRUNC('day', NOW()),
+          INTERVAL '1 day'
+        ) AS day
+      )
+      SELECT
+        s.day                        AS time,
+        COALESCE(d.rank, 0)          AS rank,
+        COALESCE(d.score, 0)         AS score,
+        COALESCE(d.uptime_ratio, 0)  AS "uptimeRatio"
+      FROM slots s
+      LEFT JOIN daily d ON d.day = s.day
+      ORDER BY s.day ASC
+    `;
+
+    const rows = await this.rankingRepository.query<{
+      time: Date;
+      rank: number;
+      score: number;
+      uptimeRatio: number;
+    }[]>(sql, [id]);
+
+    return {
+      points: rows.map((r) => ({
+        time: new Date(r.time).toISOString(),
+        rank: Number(r.rank),
+        score: Number(r.score),
+        uptimeRatio: Number(r.uptimeRatio),
+      })),
+    };
+  }
+
+  async findUptimeChart(id: number, query: ServerHistoryQueryDto): Promise<ServerUptimeChartResponseDto> {
+    const exists = await this.serverRepository.existsBy({ id });
+    if (!exists) {
+      throw new NotFoundException(`Server with id ${id} not found`);
+    }
+
+    let sql: string;
+
+    if (query.period === '24h') {
+      sql = `
+        WITH period AS (
+          SELECT
+            DATE_TRUNC('hour', NOW()) - INTERVAL '23 hours' AS date_from,
+            DATE_TRUNC('hour', NOW()) + INTERVAL '1 hour'   AS date_to
+        ),
+        slots AS (
+          SELECT generate_series(
+            (SELECT date_from FROM period),
+            (SELECT date_to FROM period) - INTERVAL '1 hour',
+            INTERVAL '1 hour'
+          ) AS hour
+        ),
+        hourly AS (
+          SELECT
+            DATE_TRUNC('hour', recorded_at) AS hour,
+            LEAST(COUNT(*)::numeric / 4.0, 1.0) AS uptime_ratio
+          FROM online_records
+          WHERE server_id = $1
+            AND recorded_at >= (SELECT date_from FROM period)
+            AND recorded_at <  (SELECT date_to FROM period)
+          GROUP BY DATE_TRUNC('hour', recorded_at)
+        )
+        SELECT
+          s.hour                             AS time,
+          COALESCE(h.uptime_ratio, 0)        AS "uptimeRatio",
+          1 - COALESCE(h.uptime_ratio, 0)    AS "downtimeRatio"
+        FROM slots s
+        LEFT JOIN hourly h ON h.hour = s.hour
+        ORDER BY s.hour ASC
+      `;
+    } else {
+      const days = parseInt(query.period);
+      sql = `
+        WITH period AS (
+          SELECT NOW() - INTERVAL '${days} days' AS date_from
+        ),
+        daily AS (
+          SELECT DISTINCT ON (DATE_TRUNC('day', calculated_at))
+            DATE_TRUNC('day', calculated_at) AS day,
+            uptime_ratio
+          FROM server_rankings
+          WHERE server_id = $1
+            AND calculated_at >= (SELECT date_from FROM period)
+          ORDER BY DATE_TRUNC('day', calculated_at), calculated_at DESC
+        ),
+        slots AS (
+          SELECT generate_series(
+            DATE_TRUNC('day', (SELECT date_from FROM period)),
+            DATE_TRUNC('day', NOW()),
+            INTERVAL '1 day'
+          ) AS day
+        )
+        SELECT
+          s.day                            AS time,
+          COALESCE(d.uptime_ratio, 0)      AS "uptimeRatio",
+          1 - COALESCE(d.uptime_ratio, 0)  AS "downtimeRatio"
+        FROM slots s
+        LEFT JOIN daily d ON d.day = s.day
+        ORDER BY s.day ASC
+      `;
+    }
+
+    const rows = await this.rankingRepository.query<{
+      time: Date;
+      uptimeRatio: number;
+      downtimeRatio: number;
+    }[]>(sql, [id]);
+
+    return {
+      points: rows.map((r) => ({
+        time: new Date(r.time).toISOString(),
+        uptimeRatio: Number(r.uptimeRatio),
+        downtimeRatio: Number(r.downtimeRatio),
+      })),
+    };
   }
 }

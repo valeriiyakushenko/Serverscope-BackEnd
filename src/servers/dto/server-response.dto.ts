@@ -26,6 +26,8 @@ export class ServerItemDto {
   @ApiProperty() version: string;
   @ApiProperty() lastSeenAt: Date;
   @ApiProperty() updatedAt: Date;
+  @ApiProperty() popularity: number;
+  @ApiProperty() stability: number;
 }
 
 export class ServersListResponseDto {
@@ -47,4 +49,25 @@ export class ServerChartPointDto {
 
 export class ServerChartResponseDto {
   @ApiProperty({ type: [ServerChartPointDto] }) points: ServerChartPointDto[];
+}
+
+export class ServerRankChartPointDto {
+  @ApiProperty() time: string;
+  @ApiProperty() rank: number;
+  @ApiProperty() score: number;
+  @ApiProperty() uptimeRatio: number;
+}
+
+export class ServerRankChartResponseDto {
+  @ApiProperty({ type: [ServerRankChartPointDto] }) points: ServerRankChartPointDto[];
+}
+
+export class ServerUptimeChartPointDto {
+  @ApiProperty() time: string;
+  @ApiProperty() uptimeRatio: number;
+  @ApiProperty() downtimeRatio: number;
+}
+
+export class ServerUptimeChartResponseDto {
+  @ApiProperty({ type: [ServerUptimeChartPointDto] }) points: ServerUptimeChartPointDto[];
 }

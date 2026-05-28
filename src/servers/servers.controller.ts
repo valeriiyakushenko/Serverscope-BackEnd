@@ -1,8 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ServersService } from './servers.service';
-import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto } from './dto/query-servers.dto';
-import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto } from './dto/server-response.dto';
+import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
+import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto, ServerRankChartResponseDto, ServerUptimeChartResponseDto } from './dto/server-response.dto';
 
 @ApiTags('Servers')
 @Controller('servers')
@@ -38,5 +38,25 @@ export class ServersController {
     @Query() query: ServerChartQueryDto,
   ): Promise<ServerChartResponseDto> {
     return this.serversService.findChart(id, query);
+  }
+
+  @Get(':id/rank-chart')
+  @ApiOperation({ summary: 'Get rank history chart for a server' })
+  @ApiOkResponse({ type: ServerRankChartResponseDto })
+  findRankChart(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: ServerRankHistoryQueryDto,
+  ): Promise<ServerRankChartResponseDto> {
+    return this.serversService.findRankChart(id, query);
+  }
+
+  @Get(':id/uptime-chart')
+  @ApiOperation({ summary: 'Get uptime/downtime chart for a server' })
+  @ApiOkResponse({ type: ServerUptimeChartResponseDto })
+  findUptimeChart(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: ServerHistoryQueryDto,
+  ): Promise<ServerUptimeChartResponseDto> {
+    return this.serversService.findUptimeChart(id, query);
   }
 }
