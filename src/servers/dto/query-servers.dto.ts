@@ -38,13 +38,20 @@ export class QueryServersDto {
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by IP address (exact match)' })
+  @IsOptional()
+  @IsString()
+  ip?: string;
+
   @ApiPropertyOptional({ enum: ['name', 'rank', 'players'], default: 'rank' })
   @IsOptional()
+  @Transform(({ value }) => value ?? 'rank')
   @IsIn(['name', 'rank', 'players'])
   sortBy?: 'name' | 'rank' | 'players' = 'rank';
 
   @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'asc' })
   @IsOptional()
+  @Transform(({ value }) => value ?? 'asc')
   @IsIn(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc' = 'asc';
 
@@ -87,4 +94,11 @@ export class QueryServersMapsDto {
   @IsInt()
   @Min(1)
   minServers?: number = 100;
+}
+
+export class ServerChartQueryDto {
+  @ApiProperty({ enum: ['24h', '3d', '7d', '30d'], description: 'Chart period' })
+  @IsNotEmpty()
+  @IsIn(['24h', '3d', '7d', '30d'])
+  period: '24h' | '3d' | '7d' | '30d';
 }

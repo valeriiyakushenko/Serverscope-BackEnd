@@ -5,6 +5,7 @@ import { GamesModule } from './games/games.module';
 import { Game } from './games/games.entity';
 import { ServersModule } from './servers/servers.module';
 import { Server } from './servers/servers.entity';
+import { OnlineRecord } from './servers/online-record.entity';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { Server } from './servers/servers.entity';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        entities: [Game, Server],
+        entities: [Game, Server, OnlineRecord],
         synchronize: false,
       }),
     }),

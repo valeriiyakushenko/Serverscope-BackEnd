@@ -35,3 +35,16 @@ export class ServersListResponseDto {
   @ApiProperty() limit: number;
   @ApiProperty() totalPages: number;
 }
+
+export class ServerDetailDto extends ServerItemDto {
+  @ApiProperty() createdAt: Date;
+}
+
+export class ServerChartPointDto {
+  @ApiProperty() time: string;
+  @ApiProperty() players: number;
+}
+
+export class ServerChartResponseDto {
+  @ApiProperty({ type: [ServerChartPointDto] }) points: ServerChartPointDto[];
+}
