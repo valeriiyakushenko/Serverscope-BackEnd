@@ -5,10 +5,11 @@ import { OnlineRecord } from './online-record.entity';
 import { ServerRanking } from './server-ranking.entity';
 import { ServersService } from './servers.service';
 import { ServersController } from './servers.controller';
+import {DeveloperServersController} from "./developer-servers.controller";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Server, OnlineRecord, ServerRanking])],
-  controllers: [ServersController],
+  controllers: [ServersController, DeveloperServersController],
   providers: [ServersService],
 })
 export class ServersModule {}

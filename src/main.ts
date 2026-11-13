@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RfcExceptionFilter } from './common/filters/rfc-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+  })
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -14,6 +19,8 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalFilters(new RfcExceptionFilter());
+
   const config = new DocumentBuilder()
     .setTitle('Serverscope API')
     .setDescription('Backend API for Serverscope — Steam game server tracking service')
@@ -22,6 +29,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('v1/docs', app, document);
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
