@@ -7,6 +7,9 @@ import { ServersModule } from './servers/servers.module';
 import { Server } from './servers/servers.entity';
 import { OnlineRecord } from './servers/online-record.entity';
 import { ServerRanking } from './servers/server-ranking.entity';
+import { DevelopersModule } from './developers/developers.module';
+import { ApiKey } from './developers/api-key.entity';
+import { Developer } from './developers/developer.entity';
 
 @Module({
   imports: [
@@ -23,12 +26,13 @@ import { ServerRanking } from './servers/server-ranking.entity';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        entities: [Game, Server, OnlineRecord, ServerRanking],
+        entities: [Game, Server, OnlineRecord, ServerRanking, Developer, ApiKey],
         synchronize: false,
       }),
     }),
     GamesModule,
     ServersModule,
+    DevelopersModule,
   ],
 })
 export class AppModule {}

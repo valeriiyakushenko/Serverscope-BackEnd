@@ -6,9 +6,10 @@ import { ServerRanking } from './server-ranking.entity';
 import { ServersService } from './servers.service';
 import { ServersController } from './servers.controller';
 import {DeveloperServersController} from "./developer-servers.controller";
+import { DevelopersModule } from '../developers/developers.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Server, OnlineRecord, ServerRanking])],
+  imports: [TypeOrmModule.forFeature([Server, OnlineRecord, ServerRanking]), DevelopersModule],
   controllers: [ServersController, DeveloperServersController],
   providers: [ServersService],
 })

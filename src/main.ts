@@ -25,6 +25,10 @@ async function bootstrap() {
     .setTitle('Serverscope API')
     .setDescription('Backend API for Serverscope — Steam game server tracking service')
     .setVersion('1.0')
+    .addApiKey(
+      { type: 'apiKey', name: 'X-API-Key', in: 'header' },
+      'X-API-Key',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
