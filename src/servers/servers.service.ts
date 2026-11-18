@@ -82,6 +82,8 @@ export class ServersService {
     } else {
       qb.orderBy(`server.${sortBy}`, sortOrder.toUpperCase() as 'ASC' | 'DESC');
     }
+    // unique tie-breaker: without it OFFSET pages repeat and skip rows among equal players/rank
+    qb.addOrderBy('server.id', 'ASC');
 
     qb.skip((page - 1) * limit).take(limit);
 
