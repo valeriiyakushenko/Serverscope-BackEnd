@@ -66,20 +66,20 @@ export class QueryServersDto {
 
   @ApiPropertyOptional({ description: 'Filter by VAC-secured servers' })
   @IsOptional()
-  @Transform(({ value }) => {
+  @Transform(({ value }: { value: unknown }) => {
     if (value === 'true' || value === true) return true;
     if (value === 'false' || value === false) return false;
-    return undefined;
+    return value; // anything else reaches @IsBoolean and gets a 400
   })
   @IsBoolean()
   isSecure?: boolean;
 
   @ApiPropertyOptional({ description: 'Filter by online status' })
   @IsOptional()
-  @Transform(({ value }) => {
+  @Transform(({ value }: { value: unknown }) => {
     if (value === 'true' || value === true) return true;
     if (value === 'false' || value === false) return false;
-    return undefined;
+    return value; // anything else reaches @IsBoolean and gets a 400
   })
   @IsBoolean()
   isOnline?: boolean;
