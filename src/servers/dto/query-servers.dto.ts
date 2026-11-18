@@ -94,11 +94,17 @@ export class QueryServersMapsDto {
   @IsNotEmpty()
   appid: number;
 
-  @ApiPropertyOptional({ description: 'Minimum number of servers per map', default: 100, minimum: 1 })
+  @ApiPropertyOptional({
+    description: 'Minimum number of servers per map',
+    default: 100,
+    minimum: 1,
+    maximum: INT4_MAX,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(INT4_MAX)
   minServers?: number = 100;
 }
 
