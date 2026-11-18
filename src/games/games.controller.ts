@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import {
@@ -12,6 +11,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { ParseIdPipe } from '../common/parse-id.pipe';
 import { GamesService } from './games.service';
 import { QueryGamesDto } from './dto/query-games.dto';
 import { GameDto, GamesListResponseDto } from './dto/game-response.dto';
@@ -33,7 +33,7 @@ export class GamesController {
   @ApiParam({ name: 'appid', description: 'Steam App ID', type: Number })
   @ApiOkResponse({ type: GameDto })
   @ApiNotFoundResponse({ description: 'Game not found' })
-  findOne(@Param('appid', ParseIntPipe) appid: number): Promise<GameDto> {
+  findOne(@Param('appid', ParseIdPipe) appid: number): Promise<GameDto> {
     return this.gamesService.findByAppid(appid);
   }
 }

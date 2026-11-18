@@ -10,19 +10,23 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { INT4_MAX, MAX_PAGE } from '../../common/parse-id.pipe';
 
 export class QueryServersDto {
   @ApiProperty({ description: 'Game appid filter' })
   @Type(() => Number)
   @IsInt()
+  @Min(1)
+  @Max(INT4_MAX)
   @IsNotEmpty()
   appid: number;
 
-  @ApiPropertyOptional({ default: 1, minimum: 1 })
+  @ApiPropertyOptional({ default: 1, minimum: 1, maximum: MAX_PAGE })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(MAX_PAGE)
   page?: number = 1;
 
   @ApiPropertyOptional({ default: 25, minimum: 1, maximum: 100 })
@@ -85,6 +89,8 @@ export class QueryServersMapsDto {
   @ApiProperty({ description: 'Game appid filter' })
   @Type(() => Number)
   @IsInt()
+  @Min(1)
+  @Max(INT4_MAX)
   @IsNotEmpty()
   appid: number;
 

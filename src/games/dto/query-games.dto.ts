@@ -8,6 +8,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { MAX_PAGE } from '../../common/parse-id.pipe';
 
 export enum SortByField {
   PLAYERS = 'players',
@@ -21,11 +22,17 @@ export enum SortOrder {
 }
 
 export class QueryGamesDto {
-  @ApiPropertyOptional({ description: 'Page number', default: 1, minimum: 1 })
+  @ApiPropertyOptional({
+    description: 'Page number',
+    default: 1,
+    minimum: 1,
+    maximum: MAX_PAGE,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(MAX_PAGE)
   page?: number = 1;
 
   @ApiPropertyOptional({ description: 'Items per page', default: 20, minimum: 1, maximum: 100 })

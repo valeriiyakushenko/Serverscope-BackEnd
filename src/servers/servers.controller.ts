@@ -1,5 +1,6 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ParseIdPipe } from '../common/parse-id.pipe';
 import { ServersService } from './servers.service';
 import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
 import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto, ServerRankChartResponseDto, ServerUptimeChartResponseDto } from './dto/server-response.dto';
@@ -26,7 +27,7 @@ export class ServersController {
   @Get(':id')
   @ApiOperation({ summary: 'Get server by id' })
   @ApiOkResponse({ type: ServerDetailDto })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ServerDetailDto> {
+  findOne(@Param('id', ParseIdPipe) id: number): Promise<ServerDetailDto> {
     return this.serversService.findOne(id);
   }
 
@@ -34,7 +35,7 @@ export class ServersController {
   @ApiOperation({ summary: 'Get online chart for a server' })
   @ApiOkResponse({ type: ServerChartResponseDto })
   findChart(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIdPipe) id: number,
     @Query() query: ServerChartQueryDto,
   ): Promise<ServerChartResponseDto> {
     return this.serversService.findChart(id, query);
@@ -44,7 +45,7 @@ export class ServersController {
   @ApiOperation({ summary: 'Get rank history chart for a server' })
   @ApiOkResponse({ type: ServerRankChartResponseDto })
   findRankChart(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIdPipe) id: number,
     @Query() query: ServerRankHistoryQueryDto,
   ): Promise<ServerRankChartResponseDto> {
     return this.serversService.findRankChart(id, query);
@@ -54,7 +55,7 @@ export class ServersController {
   @ApiOperation({ summary: 'Get uptime/downtime chart for a server' })
   @ApiOkResponse({ type: ServerUptimeChartResponseDto })
   findUptimeChart(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIdPipe) id: number,
     @Query() query: ServerHistoryQueryDto,
   ): Promise<ServerUptimeChartResponseDto> {
     return this.serversService.findUptimeChart(id, query);
