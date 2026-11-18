@@ -238,7 +238,8 @@ export class ServersService {
         )
         SELECT
           TO_CHAR(slots.slot AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS time,
-          COALESCE(AVG(r.players)::int, 0) AS players
+          -- empty slots have no point and count as 0: divide by the 4 collections per hour, not AVG
+          COALESCE((SUM(r.players) / 4.0)::int, 0) AS players
         FROM slots
         LEFT JOIN online_records r
           ON date_trunc('hour', r.recorded_at) = slots.slot
