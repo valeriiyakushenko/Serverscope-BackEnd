@@ -144,28 +144,7 @@ export class ServersService {
   async findOne(id: number): Promise<ServerDetailDto> {
     const server = await this.serverRepository
       .createQueryBuilder('server')
-      .select([
-        'server.id',
-        'server.ip',
-        'server.queryPort',
-        'server.gamePort',
-        'server.name',
-        'server.appid',
-        'server.version',
-        'server.map',
-        'server.isSecure',
-        'server.isDedicated',
-        'server.os',
-        'server.region',
-        'server.maxPlayers',
-        'server.players',
-        'server.rank',
-        'server.hourlyOnline',
-        'server.isOnline',
-        'server.createdAt',
-        'server.updatedAt',
-        'server.lastSeenAt',
-      ])
+      .select([...SERVER_SELECT_FIELDS, 'server.createdAt'])
       .where('server.id = :id', { id })
       .getOne();
 
