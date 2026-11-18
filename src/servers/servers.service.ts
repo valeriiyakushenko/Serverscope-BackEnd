@@ -177,7 +177,7 @@ export class ServersService {
         WITH slots AS (
           SELECT generate_series(
             date_trunc('minute', NOW() - INTERVAL '24 hours') - (EXTRACT(MINUTE FROM NOW() - INTERVAL '24 hours')::int % 15) * INTERVAL '1 minute',
-            date_trunc('minute', NOW()) - (EXTRACT(MINUTE FROM NOW())::int % 15) * INTERVAL '1 minute',
+            date_trunc('minute', NOW()) - (EXTRACT(MINUTE FROM NOW())::int % 15) * INTERVAL '1 minute' - INTERVAL '15 minutes',
             INTERVAL '15 minutes'
           ) AS slot
         )
@@ -202,7 +202,7 @@ export class ServersService {
         WITH slots AS (
           SELECT generate_series(
             date_trunc('hour', NOW() - INTERVAL '${interval}'),
-            date_trunc('hour', NOW()),
+            date_trunc('hour', NOW()) - INTERVAL '1 hour',
             INTERVAL '1 hour'
           ) AS slot
         )
@@ -291,8 +291,8 @@ export class ServersService {
       sql = `
         WITH period AS (
           SELECT
-            DATE_TRUNC('hour', NOW()) - INTERVAL '23 hours' AS date_from,
-            DATE_TRUNC('hour', NOW()) + INTERVAL '1 hour'   AS date_to
+            DATE_TRUNC('hour', NOW()) - INTERVAL '24 hours' AS date_from,
+            DATE_TRUNC('hour', NOW())                       AS date_to
         ),
         slots AS (
           SELECT generate_series(
