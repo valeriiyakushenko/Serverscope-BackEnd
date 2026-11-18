@@ -65,7 +65,8 @@ export class ServerRankChartPointDto {
 }
 
 export class ServerRankChartResponseDto {
-  @ApiProperty({ type: [ServerRankChartPointDto] }) points: ServerRankChartPointDto[];
+  @ApiProperty({ type: [ServerRankChartPointDto] })
+  points: ServerRankChartPointDto[];
 }
 
 export class ServerUptimeChartPointDto {
@@ -81,5 +82,6 @@ export class ServerUptimeChartPointDto {
 }
 
 export class ServerUptimeChartResponseDto {
-  @ApiProperty({ type: [ServerUptimeChartPointDto] }) points: ServerUptimeChartPointDto[];
+  @ApiProperty({ type: [ServerUptimeChartPointDto] })
+  points: ServerUptimeChartPointDto[];
 }

@@ -1,13 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { MAX_PAGE } from '../../common/parse-id.pipe';
 
 export enum SortByField {
@@ -35,7 +28,12 @@ export class QueryGamesDto {
   @Max(MAX_PAGE)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: 'Items per page', default: 20, minimum: 1, maximum: 100 })
+  @ApiPropertyOptional({
+    description: 'Items per page',
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

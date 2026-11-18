@@ -25,7 +25,10 @@ export class GameDto {
   })
   hourly_online: number[];
 
-  @ApiPropertyOptional({ description: 'Last updated timestamp', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Last updated timestamp',
+    nullable: true,
+  })
   updated_at: Date | null;
 }
 

@@ -2,8 +2,21 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseIdPipe } from '../common/parse-id.pipe';
 import { ServersService } from './servers.service';
-import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
-import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto, ServerRankChartResponseDto, ServerUptimeChartResponseDto } from './dto/server-response.dto';
+import {
+  QueryServersDto,
+  QueryServersMapsDto,
+  ServerChartQueryDto,
+  ServerHistoryQueryDto,
+  ServerRankHistoryQueryDto,
+} from './dto/query-servers.dto';
+import {
+  ServersListResponseDto,
+  ServerMapDto,
+  ServerDetailDto,
+  ServerChartResponseDto,
+  ServerRankChartResponseDto,
+  ServerUptimeChartResponseDto,
+} from './dto/server-response.dto';
 
 @ApiTags('Servers')
 @Controller('servers')

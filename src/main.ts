@@ -16,7 +16,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Serverscope API')
-    .setDescription('Backend API for Serverscope — Steam game server tracking service')
+    .setDescription(
+      'Backend API for Serverscope — Steam game server tracking service',
+    )
     .setVersion('1.0')
     .build();
 
@@ -29,4 +31,4 @@ async function bootstrap() {
   console.log(`Swagger docs: http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+void bootstrap();

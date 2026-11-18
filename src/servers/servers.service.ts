@@ -4,8 +4,21 @@ import { Repository } from 'typeorm';
 import { escapeLike } from '../common/escape-like';
 import { Server } from './servers.entity';
 import { ServerRanking } from './server-ranking.entity';
-import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
-import { ServersListResponseDto, ServerMapDto, ServerDetailDto, ServerChartResponseDto, ServerRankChartResponseDto, ServerUptimeChartResponseDto } from './dto/server-response.dto';
+import {
+  QueryServersDto,
+  QueryServersMapsDto,
+  ServerChartQueryDto,
+  ServerHistoryQueryDto,
+  ServerRankHistoryQueryDto,
+} from './dto/query-servers.dto';
+import {
+  ServersListResponseDto,
+  ServerMapDto,
+  ServerDetailDto,
+  ServerChartResponseDto,
+  ServerRankChartResponseDto,
+  ServerUptimeChartResponseDto,
+} from './dto/server-response.dto';
 
 const SERVER_SELECT_FIELDS = [
   'server.id',
@@ -133,10 +146,16 @@ export class ServersService {
       [serverIds],
     );
 
-    return new Map(rows.map((r) => [r.server_id, { popularity: r.popularity, stability: r.stability }]));
+    return new Map(
+      rows.map((r) => [
+        r.server_id,
+        { popularity: r.popularity, stability: r.stability },
+      ]),
+    );
   }
 
-  async findMaps(query: QueryServersMapsDto): Promise<ServerMapDto[]> {    const { appid, minServers = 100 } = query;
+  async findMaps(query: QueryServersMapsDto): Promise<ServerMapDto[]> {
+    const { appid, minServers = 100 } = query;
 
     return this.serverRepository.query<ServerMapDto[]>(
       `SELECT map, COUNT(*)::int AS "serverCount"
@@ -170,7 +189,10 @@ export class ServersService {
     };
   }
 
-  async findChart(id: number, query: ServerChartQueryDto): Promise<ServerChartResponseDto> {
+  async findChart(
+    id: number,
+    query: ServerChartQueryDto,
+  ): Promise<ServerChartResponseDto> {
     const exists = await this.serverRepository.existsBy({ id });
     if (!exists) {
       throw new NotFoundException(`Server with id ${id} not found`);
@@ -226,12 +248,17 @@ export class ServersService {
       `;
     }
 
-    const rows = await this.serverRepository.query<{ time: string; players: number }[]>(sql, [id]);
+    const rows = await this.serverRepository.query<
+      { time: string; players: number }[]
+    >(sql, [id]);
 
     return { points: rows };
   }
 
-  async findRankChart(id: number, query: ServerRankHistoryQueryDto): Promise<ServerRankChartResponseDto> {
+  async findRankChart(
+    id: number,
+    query: ServerRankHistoryQueryDto,
+  ): Promise<ServerRankChartResponseDto> {
     const exists = await this.serverRepository.existsBy({ id });
     if (!exists) {
       throw new NotFoundException(`Server with id ${id} not found`);
@@ -270,12 +297,14 @@ export class ServersService {
       ORDER BY s.day ASC
     `;
 
-    const rows = await this.rankingRepository.query<{
-      time: Date;
-      rank: number | null;
-      score: string | null;
-      uptimeRatio: string | null;
-    }[]>(sql, [id]);
+    const rows = await this.rankingRepository.query<
+      {
+        time: Date;
+        rank: number | null;
+        score: string | null;
+        uptimeRatio: string | null;
+      }[]
+    >(sql, [id]);
 
     return {
       points: rows.map((r) => ({
@@ -287,7 +316,10 @@ export class ServersService {
     };
   }
 
-  async findUptimeChart(id: number, query: ServerHistoryQueryDto): Promise<ServerUptimeChartResponseDto> {
+  async findUptimeChart(
+    id: number,
+    query: ServerHistoryQueryDto,
+  ): Promise<ServerUptimeChartResponseDto> {
     const exists = await this.serverRepository.existsBy({ id });
     if (!exists) {
       throw new NotFoundException(`Server with id ${id} not found`);
@@ -359,11 +391,13 @@ export class ServersService {
       `;
     }
 
-    const rows = await this.rankingRepository.query<{
-      time: Date;
-      uptimeRatio: string | null;
-      downtimeRatio: string | null;
-    }[]>(sql, [id]);
+    const rows = await this.rankingRepository.query<
+      {
+        time: Date;
+        uptimeRatio: string | null;
+        downtimeRatio: string | null;
+      }[]
+    >(sql, [id]);
 
     return {
       points: rows.map((r) => ({

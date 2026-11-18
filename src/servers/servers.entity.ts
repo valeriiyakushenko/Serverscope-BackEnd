@@ -29,9 +29,12 @@ export class Server {
   @Column({ name: 'max_players', type: 'int', default: 0 }) maxPlayers: number;
   @Column({ type: 'int', default: 0 }) players: number;
   @Column({ type: 'int', default: 0 }) rank: number;
-  @Column({ name: 'hourly_online', type: 'jsonb', default: [] }) hourlyOnline: number[];
-  @Column({ name: 'is_online', type: 'boolean', default: true }) isOnline: boolean;
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' }) createdAt: Date;
+  @Column({ name: 'hourly_online', type: 'jsonb', default: [] })
+  hourlyOnline: number[];
+  @Column({ name: 'is_online', type: 'boolean', default: true })
+  isOnline: boolean;
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
   @Column({ name: 'updated_at', type: 'timestamptz' }) updatedAt: Date;
   @Column({ name: 'last_seen_at', type: 'timestamptz' }) lastSeenAt: Date;
 }

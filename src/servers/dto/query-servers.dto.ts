@@ -37,7 +37,9 @@ export class QueryServersDto {
   @Max(100)
   limit?: number = 25;
 
-  @ApiPropertyOptional({ description: 'Search by server name (case-insensitive)' })
+  @ApiPropertyOptional({
+    description: 'Search by server name (case-insensitive)',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -49,13 +51,13 @@ export class QueryServersDto {
 
   @ApiPropertyOptional({ enum: ['name', 'rank', 'players'], default: 'rank' })
   @IsOptional()
-  @Transform(({ value }) => value ?? 'rank')
+  @Transform(({ value }: { value: unknown }) => value ?? 'rank')
   @IsIn(['name', 'rank', 'players'])
   sortBy?: 'name' | 'rank' | 'players' = 'rank';
 
   @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'asc' })
   @IsOptional()
-  @Transform(({ value }) => value ?? 'asc')
+  @Transform(({ value }: { value: unknown }) => value ?? 'asc')
   @IsIn(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc' = 'asc';
 
@@ -109,14 +111,20 @@ export class QueryServersMapsDto {
 }
 
 export class ServerChartQueryDto {
-  @ApiProperty({ enum: ['24h', '3d', '7d', '30d'], description: 'Chart period' })
+  @ApiProperty({
+    enum: ['24h', '3d', '7d', '30d'],
+    description: 'Chart period',
+  })
   @IsNotEmpty()
   @IsIn(['24h', '3d', '7d', '30d'])
   period: '24h' | '3d' | '7d' | '30d';
 }
 
 export class ServerHistoryQueryDto {
-  @ApiProperty({ enum: ['24h', '3d', '7d', '30d'], description: 'History period' })
+  @ApiProperty({
+    enum: ['24h', '3d', '7d', '30d'],
+    description: 'History period',
+  })
   @IsNotEmpty()
   @IsIn(['24h', '3d', '7d', '30d'])
   period: '24h' | '3d' | '7d' | '30d';

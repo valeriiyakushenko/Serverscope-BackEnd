@@ -14,7 +14,13 @@ export class GamesService {
   ) {}
 
   async findAll(query: QueryGamesDto): Promise<GamesListResponseDto> {
-    const { page = 1, limit = 20, sortBy = 'players', order = 'desc', search } = query;
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'players',
+      order = 'desc',
+      search,
+    } = query;
 
     const qb = this.gameRepository.createQueryBuilder('game');
 
