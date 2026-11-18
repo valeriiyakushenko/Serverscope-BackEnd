@@ -28,6 +28,11 @@ const SERVER_SELECT_FIELDS = [
   'server.updatedAt',
 ];
 
+// a missing daily ranking stays null: Number(null) would turn it into a fake 0
+function toNumberOrNull(value: number | string | null): number | null {
+  return value === null ? null : Number(value);
+}
+
 @Injectable()
 export class ServersService {
   constructor(
@@ -242,7 +247,7 @@ export class ServersService {
           uptime_ratio
         FROM server_rankings
         WHERE server_id = $1
-          AND calculated_at >= (SELECT date_from FROM period)
+          AND calculated_at >= DATE_TRUNC('day', (SELECT date_from FROM period))
         ORDER BY DATE_TRUNC('day', calculated_at), calculated_at DESC
       ),
       slots AS (
@@ -253,10 +258,10 @@ export class ServersService {
         ) AS day
       )
       SELECT
-        s.day                        AS time,
-        COALESCE(d.rank, 0)          AS rank,
-        COALESCE(d.score, 0)         AS score,
-        COALESCE(d.uptime_ratio, 0)  AS "uptimeRatio"
+        s.day           AS time,
+        d.rank          AS rank,
+        d.score         AS score,
+        d.uptime_ratio  AS "uptimeRatio"
       FROM slots s
       LEFT JOIN daily d ON d.day = s.day
       ORDER BY s.day ASC
@@ -264,17 +269,17 @@ export class ServersService {
 
     const rows = await this.rankingRepository.query<{
       time: Date;
-      rank: number;
-      score: number;
-      uptimeRatio: number;
+      rank: number | null;
+      score: string | null;
+      uptimeRatio: string | null;
     }[]>(sql, [id]);
 
     return {
       points: rows.map((r) => ({
         time: new Date(r.time).toISOString(),
-        rank: Number(r.rank),
-        score: Number(r.score),
-        uptimeRatio: Number(r.uptimeRatio),
+        rank: toNumberOrNull(r.rank),
+        score: toNumberOrNull(r.score),
+        uptimeRatio: toNumberOrNull(r.uptimeRatio),
       })),
     };
   }
@@ -331,7 +336,7 @@ export class ServersService {
             uptime_ratio
           FROM server_rankings
           WHERE server_id = $1
-            AND calculated_at >= (SELECT date_from FROM period)
+            AND calculated_at >= DATE_TRUNC('day', (SELECT date_from FROM period))
           ORDER BY DATE_TRUNC('day', calculated_at), calculated_at DESC
         ),
         slots AS (
@@ -342,9 +347,9 @@ export class ServersService {
           ) AS day
         )
         SELECT
-          s.day                            AS time,
-          COALESCE(d.uptime_ratio, 0)      AS "uptimeRatio",
-          1 - COALESCE(d.uptime_ratio, 0)  AS "downtimeRatio"
+          s.day               AS time,
+          d.uptime_ratio      AS "uptimeRatio",
+          1 - d.uptime_ratio  AS "downtimeRatio"
         FROM slots s
         LEFT JOIN daily d ON d.day = s.day
         ORDER BY s.day ASC
@@ -353,15 +358,15 @@ export class ServersService {
 
     const rows = await this.rankingRepository.query<{
       time: Date;
-      uptimeRatio: number;
-      downtimeRatio: number;
+      uptimeRatio: string | null;
+      downtimeRatio: string | null;
     }[]>(sql, [id]);
 
     return {
       points: rows.map((r) => ({
         time: new Date(r.time).toISOString(),
-        uptimeRatio: Number(r.uptimeRatio),
-        downtimeRatio: Number(r.downtimeRatio),
+        uptimeRatio: toNumberOrNull(r.uptimeRatio),
+        downtimeRatio: toNumberOrNull(r.downtimeRatio),
       })),
     };
   }

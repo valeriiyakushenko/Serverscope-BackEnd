@@ -53,9 +53,15 @@ export class ServerChartResponseDto {
 
 export class ServerRankChartPointDto {
   @ApiProperty() time: string;
-  @ApiProperty() rank: number;
-  @ApiProperty() score: number;
-  @ApiProperty() uptimeRatio: number;
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description: 'null for a day without a ranking calculation',
+  })
+  rank: number | null;
+  @ApiProperty({ type: Number, nullable: true }) score: number | null;
+  @ApiProperty({ type: Number, nullable: true })
+  uptimeRatio: number | null;
 }
 
 export class ServerRankChartResponseDto {
@@ -64,8 +70,14 @@ export class ServerRankChartResponseDto {
 
 export class ServerUptimeChartPointDto {
   @ApiProperty() time: string;
-  @ApiProperty() uptimeRatio: number;
-  @ApiProperty() downtimeRatio: number;
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description: 'null for a day without a ranking calculation (3d/7d/30d)',
+  })
+  uptimeRatio: number | null;
+  @ApiProperty({ type: Number, nullable: true })
+  downtimeRatio: number | null;
 }
 
 export class ServerUptimeChartResponseDto {
