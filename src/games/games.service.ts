@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Game } from './games.entity';
 import { QueryGamesDto } from './dto/query-games.dto';
 import { GamesListResponseDto } from './dto/game-response.dto';
+import { escapeLike } from '../common/escape-like';
 
 @Injectable()
 export class GamesService {
@@ -19,7 +20,7 @@ export class GamesService {
 
     if (search) {
       qb.where('LOWER(game.name) LIKE :search', {
-        search: `%${search.toLowerCase()}%`,
+        search: `%${escapeLike(search.toLowerCase())}%`,
       });
     }
 

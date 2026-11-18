@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { escapeLike } from '../common/escape-like';
 import { Server } from './servers.entity';
 import { ServerRanking } from './server-ranking.entity';
 import { QueryServersDto, QueryServersMapsDto, ServerChartQueryDto, ServerHistoryQueryDto, ServerRankHistoryQueryDto } from './dto/query-servers.dto';
@@ -62,7 +63,9 @@ export class ServersService {
       .where('server.appid = :appid', { appid });
 
     if (search) {
-      qb.andWhere('server.name ILIKE :search', { search: `%${search}%` });
+      qb.andWhere('server.name ILIKE :search', {
+        search: `%${escapeLike(search)}%`,
+      });
     }
 
     if (ip !== undefined) {
