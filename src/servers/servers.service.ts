@@ -47,6 +47,9 @@ function toNumberOrNull(value: number | string | null): number | null {
   return value === null ? null : Number(value);
 }
 
+// servers with no players for this long are left out of lists; their page and history stay reachable by id
+const HIDE_AFTER = '5 days';
+
 @Injectable()
 export class ServersService {
   constructor(
@@ -73,7 +76,8 @@ export class ServersService {
     const qb = this.serverRepository
       .createQueryBuilder('server')
       .select(SERVER_SELECT_FIELDS)
-      .where('server.appid = :appid', { appid });
+      .where('server.appid = :appid', { appid })
+      .andWhere(`server.lastSeenAt >= NOW() - INTERVAL '${HIDE_AFTER}'`);
 
     if (search) {
       qb.andWhere('server.name ILIKE :search', {
@@ -161,6 +165,7 @@ export class ServersService {
       `SELECT map, COUNT(*)::int AS "serverCount"
        FROM servers
        WHERE appid = $1
+         AND last_seen_at >= NOW() - INTERVAL '${HIDE_AFTER}'
        GROUP BY map
        HAVING COUNT(*) >= $2
        ORDER BY "serverCount" DESC`,
